@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import type { DayType } from './data/timetable'
+import { useState, useEffect, useMemo } from 'react'
+import type { DayType, Train } from './data/timetable'
 import { timetable } from './data/timetable'
 import { Header } from './components/Header'
 import { DayBadge } from './components/DayBadge'
@@ -8,6 +8,7 @@ import { TrainList } from './components/TrainList'
 import { useCurrentTime } from './hooks/useCurrentTime'
 import { filterUpcomingTrains, getNextDayType } from './hooks/useTimetable'
 import { useFilter } from './hooks/useFilter'
+import { getTimetable } from './services/timetableService'
 
 const getDayType = (now: Date): DayType => {
     const day = now.getDay()
@@ -18,14 +19,26 @@ function App() {
     const now = useCurrentTime()
     const dayType = getDayType(now)
 
-    const allDayTrains = useMemo(() => timetable[dayType], [dayType])
+    // アプリ起動時に ODPT API から取得（初期値はフォールバック用ハードコードデータ）
+    const [allTrainsMap, setAllTrainsMap] = useState<{ weekday: Train[]; holiday: Train[] }>(timetable)
+
+    useEffect(() => {
+        Promise.all([
+            getTimetable('weekday'),
+            getTimetable('holiday'),
+        ]).then(([weekday, holiday]) => {
+            setAllTrainsMap({ weekday, holiday })
+        })
+    }, [])
+
+    const allDayTrains = allTrainsMap[dayType]
     const upcomingTrains = useMemo(() => filterUpcomingTrains(allDayTrains, now), [allDayTrains, now])
 
     // 終電後は翌日ダイヤに切り替える
     const isNextDay = upcomingTrains.length === 0
     const nextDayType = useMemo(() => getNextDayType(now.getDay()), [now])
     const displayDayType = isNextDay ? nextDayType : dayType
-    const allDisplayDayTrains = useMemo(() => timetable[displayDayType], [displayDayType])
+    const allDisplayDayTrains = allTrainsMap[displayDayType]
     const displayUpstreamTrains = isNextDay ? allDisplayDayTrains : upcomingTrains
 
     const { destinations, hiddenDestinations, toggleDestination, filteredTrains } = useFilter(allDisplayDayTrains, displayUpstreamTrains)
