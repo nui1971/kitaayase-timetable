@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { DayType } from './data/timetable'
+import { timetable } from './data/timetable'
 import { Header } from './components/Header'
 import { TabBar } from './components/TabBar'
+import { FilterBar } from './components/FilterBar'
 import { TrainList } from './components/TrainList'
 import { useCurrentTime } from './hooks/useCurrentTime'
-import { useTimetable } from './hooks/useTimetable'
+import { filterUpcomingTrains } from './hooks/useTimetable'
+import { useFilter } from './hooks/useFilter'
 
 const getDefaultDayType = (now: Date): DayType => {
     const day = now.getDay()
@@ -14,11 +17,15 @@ const getDefaultDayType = (now: Date): DayType => {
 function App() {
     const now = useCurrentTime()
     const [dayType, setDayType] = useState<DayType>(() => getDefaultDayType(now))
-    const trains = useTimetable(dayType, now)
+
+    const allDayTrains = useMemo(() => timetable[dayType], [dayType])
+    const upcomingTrains = useMemo(() => filterUpcomingTrains(allDayTrains, now), [allDayTrains, now])
+
+    const { destinations, hiddenDestinations, toggleDestination, filteredTrains } = useFilter(allDayTrains, upcomingTrains)
 
     return (
         <div
-            className="flex flex-col h-dvh bg-gray-50 max-w-md mx-auto"
+            className="flex flex-col h-dvh bg-[#0a0f1e] max-w-md mx-auto"
             style={{
                 paddingTop: 'env(safe-area-inset-top)',
                 paddingBottom: 'env(safe-area-inset-bottom)',
@@ -26,11 +33,16 @@ function App() {
         >
             <Header now={now} />
             <TabBar selected={dayType} onSelect={setDayType} />
+            <FilterBar
+                destinations={destinations}
+                hiddenDestinations={hiddenDestinations}
+                onToggle={toggleDestination}
+            />
             <main className="flex-1 overflow-y-auto">
-                <TrainList trains={trains} />
+                <TrainList trains={filteredTrains} now={now} dayType={dayType} />
             </main>
-            <footer className="text-center text-xs text-gray-400 py-2 border-t border-gray-200 shrink-0">
-                データ出典：駅探（2026年3月14日改正）
+            <footer className="text-center text-xs text-gray-500 py-2 border-t border-[#1e2a3a] shrink-0">
+                データ出典：東京メトロ（2026年3月14日改正）
             </footer>
         </div>
     )

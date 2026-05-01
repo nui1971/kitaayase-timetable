@@ -45,9 +45,14 @@ describe('TrainRow', () => {
     })
 
     it('次の列車は data-testid="next-train" で強調表示される', () => {
-        render(<TrainRow train={baseTrain} isNext={true} isLast={false} />)
+        render(<TrainRow train={baseTrain} isNext={true} isLast={false} minutesUntil={5} />)
         expect(screen.getByTestId('next-train')).toBeInTheDocument()
         expect(screen.getByText('10:05')).toBeInTheDocument()
+    })
+
+    it('次の列車カードに「あとXX分」を表示する', () => {
+        render(<TrainRow train={baseTrain} isNext={true} isLast={false} minutesUntil={3} />)
+        expect(screen.getByText(/あと 3 分/)).toBeInTheDocument()
     })
 
     it('0時台の列車を正しく表示する', () => {

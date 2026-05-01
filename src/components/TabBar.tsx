@@ -7,19 +7,19 @@ interface TabBarProps {
 
 const TABS: { key: DayType; label: string }[] = [
     { key: 'weekday', label: '平日' },
-    { key: 'holiday', label: '土休日' },
+    { key: 'holiday', label: '土・休日' },
 ]
 
 export const TabBar = ({ selected, onSelect }: TabBarProps) => (
-    <nav className="flex border-b border-gray-200">
+    <nav className="flex gap-2 px-4 py-3 bg-[#0a0f1e]">
         {TABS.map(({ key, label }) => (
             <button
                 key={key}
                 onClick={() => onSelect(key)}
-                className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     selected === key
                         ? 'bg-[#006400] text-white'
-                        : 'text-gray-500 hover:text-gray-700 bg-white'
+                        : 'border border-gray-600 text-gray-400 hover:text-gray-200'
                 }`}
             >
                 {label}
