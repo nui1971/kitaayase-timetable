@@ -3,6 +3,7 @@ import {
     toAbsoluteMinutes,
     toCurrentAbsoluteMinutes,
     filterUpcomingTrains,
+    getNextDayType,
 } from '../hooks/useTimetable'
 import type { Train } from '../data/timetable'
 
@@ -83,5 +84,22 @@ describe('filterUpcomingTrains', () => {
         const result = filterUpcomingTrains(trains, makeDate(23, 56))
         expect(result).toHaveLength(1)
         expect(result[0]).toMatchObject({ hour: 0, minute: 15 })
+    })
+})
+
+describe('getNextDayType', () => {
+    it('終電後に翌日ダイヤに切り替わること（火曜→水曜＝平日）', () => {
+        // 2（火曜）→ 3（水曜）= 平日
+        expect(getNextDayType(2)).toBe('weekday')
+    })
+
+    it('金曜終電後は土休日ダイヤになること', () => {
+        // 5（金曜）→ 6（土曜）= 土休日
+        expect(getNextDayType(5)).toBe('holiday')
+    })
+
+    it('日曜終電後は平日ダイヤになること', () => {
+        // 0（日曜）→ 1（月曜）= 平日
+        expect(getNextDayType(0)).toBe('weekday')
     })
 })

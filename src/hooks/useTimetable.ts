@@ -22,6 +22,12 @@ export const filterUpcomingTrains = (trains: Train[], now: Date): Train[] => {
     return trains.filter(({ hour, minute }) => toAbsoluteMinutes(hour, minute) >= current)
 }
 
+// 翌日の曜日種別を返す（月〜金→weekday、土日→holiday）
+export const getNextDayType = (currentDayOfWeek: number): DayType => {
+    const nextDay = (currentDayOfWeek + 1) % 7
+    return nextDay === 0 || nextDay === 6 ? 'holiday' : 'weekday'
+}
+
 export const useTimetable = (dayType: DayType, now: Date): Train[] => {
     const [trains, setTrains] = useState<Train[]>([])
 

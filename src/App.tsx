@@ -6,7 +6,7 @@ import { DayBadge } from './components/DayBadge'
 import { FilterBar } from './components/FilterBar'
 import { TrainList } from './components/TrainList'
 import { useCurrentTime } from './hooks/useCurrentTime'
-import { filterUpcomingTrains } from './hooks/useTimetable'
+import { filterUpcomingTrains, getNextDayType } from './hooks/useTimetable'
 import { useFilter } from './hooks/useFilter'
 
 const getDayType = (now: Date): DayType => {
@@ -21,7 +21,14 @@ function App() {
     const allDayTrains = useMemo(() => timetable[dayType], [dayType])
     const upcomingTrains = useMemo(() => filterUpcomingTrains(allDayTrains, now), [allDayTrains, now])
 
-    const { destinations, hiddenDestinations, toggleDestination, filteredTrains } = useFilter(allDayTrains, upcomingTrains)
+    // 終電後は翌日ダイヤに切り替える
+    const isNextDay = upcomingTrains.length === 0
+    const nextDayType = useMemo(() => getNextDayType(now.getDay()), [now])
+    const displayDayType = isNextDay ? nextDayType : dayType
+    const allDisplayDayTrains = useMemo(() => timetable[displayDayType], [displayDayType])
+    const displayUpstreamTrains = isNextDay ? allDisplayDayTrains : upcomingTrains
+
+    const { destinations, hiddenDestinations, toggleDestination, filteredTrains } = useFilter(allDisplayDayTrains, displayUpstreamTrains)
 
     return (
         <div style={{
@@ -35,15 +42,15 @@ function App() {
             paddingTop: 'env(safe-area-inset-top)',
             paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
-            <Header now={now} />
-            <DayBadge dayType={dayType} />
+            <Header now={now} isNextDay={isNextDay} />
+            <DayBadge dayType={displayDayType} />
             <FilterBar
                 destinations={destinations}
                 hiddenDestinations={hiddenDestinations}
                 onToggle={toggleDestination}
             />
             <main style={{ flex: 1, overflowY: 'auto' }}>
-                <TrainList trains={filteredTrains} now={now} />
+                <TrainList trains={filteredTrains} now={now} isNextDay={isNextDay} />
             </main>
             <footer style={{
                 textAlign: 'center',

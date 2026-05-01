@@ -6,9 +6,11 @@ import { toAbsoluteMinutes, toCurrentAbsoluteMinutes } from '../hooks/useTimetab
 interface TrainListProps {
     trains: Train[]
     now: Date
+    isNextDay: boolean
 }
 
 const INITIAL_COUNT = 5
+const EXPANDED_COUNT = 10
 
 const NEXT_CARD_BADGE: Record<TrainType, { backgroundColor: string; color: string }> = {
     普通: { backgroundColor: '#3a4a5a', color: '#c8d6e8' },
@@ -19,7 +21,7 @@ const NEXT_CARD_BADGE: Record<TrainType, { backgroundColor: string; color: strin
 const formatTime = (hour: number, minute: number): string =>
     `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
 
-export const TrainList = ({ trains, now }: TrainListProps) => {
+export const TrainList = ({ trains, now, isNextDay }: TrainListProps) => {
     const [expanded, setExpanded] = useState(false)
 
     if (trains.length === 0) {
@@ -32,14 +34,17 @@ export const TrainList = ({ trains, now }: TrainListProps) => {
     }
 
     const currentMinutes = toCurrentAbsoluteMinutes(now)
-    const next = trains[0]
-    const nextMins = toAbsoluteMinutes(next.hour, next.minute) - currentMinutes
+    const nextDayOffset = isNextDay ? 1440 : 0
 
-    const listTrains = trains.slice(1)
-    const displayed = expanded ? listTrains : listTrains.slice(0, INITIAL_COUNT)
-    const remaining = listTrains.length - INITIAL_COUNT
+    const next = trains[0]
+    const nextMins = toAbsoluteMinutes(next.hour, next.minute) + nextDayOffset - currentMinutes
+
+    // 修正1: 一覧は trains[0]（次の列車）から表示する
+    const displayed = expanded ? trains.slice(0, EXPANDED_COUNT) : trains.slice(0, INITIAL_COUNT)
+    const hasMore = trains.length > INITIAL_COUNT
 
     const nextBadge = NEXT_CARD_BADGE[next.trainType]
+    const lastTrain = trains[trains.length - 1]
 
     return (
         <div>
@@ -91,14 +96,14 @@ export const TrainList = ({ trains, now }: TrainListProps) => {
                         key={`${train.hour}-${train.minute}-${train.destination}`}
                         train={train}
                         isFirst={index === 0}
-                        isLast={index + 1 === trains.length - 1}
-                        minutesUntil={toAbsoluteMinutes(train.hour, train.minute) - currentMinutes}
+                        isLast={train === lastTrain}
+                        minutesUntil={toAbsoluteMinutes(train.hour, train.minute) + nextDayOffset - currentMinutes}
                     />
                 ))}
             </div>
 
-            {/* 展開/折りたたみボタン */}
-            {remaining > 0 && (
+            {/* 修正2: 展開/折りたたみボタン（+5本固定） */}
+            {hasMore && (
                 <button
                     onClick={() => setExpanded(v => !v)}
                     style={{
@@ -115,7 +120,7 @@ export const TrainList = ({ trains, now }: TrainListProps) => {
                         cursor: 'pointer',
                     }}
                 >
-                    {expanded ? '▲ 追加分を非表示' : `▼ さらに表示（+${remaining}本）`}
+                    {expanded ? '▲ 追加分を非表示' : '▼ さらに表示（+5本）'}
                 </button>
             )}
         </div>

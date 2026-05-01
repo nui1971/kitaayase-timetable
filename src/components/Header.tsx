@@ -1,8 +1,9 @@
 interface HeaderProps {
     now: Date
+    isNextDay: boolean
 }
 
-export const Header = ({ now }: HeaderProps) => {
+export const Header = ({ now, isNextDay }: HeaderProps) => {
     const hh = now.getHours().toString().padStart(2, '0')
     const mm = now.getMinutes().toString().padStart(2, '0')
 
@@ -12,6 +13,13 @@ export const Header = ({ now }: HeaderProps) => {
     const weekdays = ['日', '月', '火', '水', '木', '金', '土']
     const weekday = weekdays[now.getDay()]
     const dateStr = `${year}/${month}/${day} (${weekday})`
+
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const nextMonth = (tomorrow.getMonth() + 1).toString().padStart(2, '0')
+    const nextDay = tomorrow.getDate().toString().padStart(2, '0')
+    const nextWeekday = weekdays[tomorrow.getDay()]
+    const nextDateStr = `翌 ${nextMonth}/${nextDay} (${nextWeekday})`
 
     return (
         <header style={{
@@ -39,7 +47,9 @@ export const Header = ({ now }: HeaderProps) => {
                 <time style={{ color: 'white', fontSize: '38px', fontWeight: 300, display: 'block' }}>
                     {hh}:{mm}
                 </time>
-                <div style={{ color: '#8a9bb5', fontSize: '12px' }}>{dateStr}</div>
+                <div style={{ color: '#8a9bb5', fontSize: '12px' }}>
+                    {isNextDay ? `${dateStr} → ${nextDateStr}` : dateStr}
+                </div>
             </div>
         </header>
     )
