@@ -2,62 +2,68 @@ import type { Train, TrainType } from '../data/timetable'
 
 interface TrainRowProps {
     train: Train
-    isNext: boolean
+    isFirst: boolean
     isLast: boolean
-    minutesUntil?: number
+    minutesUntil: number
 }
 
-const BADGE_CLASS: Record<TrainType, string> = {
-    普通: 'bg-gray-600 text-white',
-    準急: 'bg-blue-500 text-white',
-    急行: 'bg-orange-500 text-white',
+const TYPE_BADGE: Record<TrainType, { backgroundColor: string; color: string }> = {
+    普通: { backgroundColor: '#3a4a5a', color: '#c8d6e8' },
+    準急: { backgroundColor: '#1a3a7a', color: '#90b8f0' },
+    急行: { backgroundColor: '#7a3a10', color: '#f0b880' },
 }
 
 const formatTime = (hour: number, minute: number): string =>
     `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
 
-const TypeBadge = ({ trainType }: { trainType: TrainType }) => (
-    <span className={`text-xs px-2 py-0.5 rounded ${BADGE_CLASS[trainType]}`}>
-        {trainType}
-    </span>
-)
+export const formatMinutesUntil = (mins: number): string => {
+    if (mins < 60) return `${mins}分後`
+    const h = Math.floor(mins / 60)
+    const m = mins % 60
+    return m === 0 ? `${h}時間後` : `${h}時間${m.toString().padStart(2, '0')}分後`
+}
 
-export const TrainRow = ({ train, isNext, isLast, minutesUntil }: TrainRowProps) => {
-    const time = formatTime(train.hour, train.minute)
-
-    if (isNext) {
-        return (
-            <div className="bg-[#1a3a2e] px-4 py-4 rounded-xl" data-testid="next-train">
-                <div className="text-xs text-gray-400 mb-1">次の列車</div>
-                <div className="flex items-center gap-2 mb-1">
-                    <span className="text-3xl font-bold text-white">{time}</span>
-                    <span className="text-base text-white">{train.destination}行き</span>
-                    <TypeBadge trainType={train.trainType} />
-                </div>
-                {minutesUntil !== undefined && (
-                    <div className="text-[#4caf50] text-sm">
-                        あと {minutesUntil} 分
-                    </div>
-                )}
-            </div>
-        )
-    }
+export const TrainRow = ({ train, isFirst, isLast, minutesUntil }: TrainRowProps) => {
+    const badge = TYPE_BADGE[train.trainType]
+    const minsText = formatMinutesUntil(minutesUntil)
+    const minsColor = isFirst && minutesUntil < 60 ? '#4a9e6a' : '#8a9bb5'
 
     return (
-        <div className="flex items-center px-4 py-3 rounded-xl bg-[#0d1526] min-h-[52px]">
-            <span className="text-lg font-bold w-14 text-white tabular-nums">{time}</span>
-            <span className="flex-1 text-gray-300 mx-2 text-sm">{train.destination}</span>
-            <div className="flex items-center gap-2">
-                <TypeBadge trainType={train.trainType} />
+        <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '12px 14px',
+            borderRadius: '10px',
+            backgroundColor: isFirst ? 'rgba(0,100,0,0.18)' : 'rgba(255,255,255,0.04)',
+            border: isFirst ? '0.5px solid rgba(0,100,0,0.35)' : 'none',
+        }}>
+            <span style={{
+                color: 'white',
+                fontSize: '22px',
+                fontWeight: 300,
+                minWidth: '56px',
+                fontVariantNumeric: 'tabular-nums',
+            }}>
+                {formatTime(train.hour, train.minute)}
+            </span>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '10px' }}>
+                <span style={{ color: 'white', fontSize: '14px' }}>{train.destination}</span>
+                <span style={{
+                    ...badge,
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    padding: '3px 8px',
+                    borderRadius: '5px',
+                }}>
+                    {train.trainType}
+                </span>
                 {isLast && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-red-500 text-white">最終</span>
-                )}
-                {minutesUntil !== undefined && (
-                    <span className="text-sm text-gray-400 w-12 text-right tabular-nums">
-                        {minutesUntil}<span className="text-xs">分後</span>
-                    </span>
+                    <span style={{ fontSize: '11px', color: '#f87171' }}>最終</span>
                 )}
             </div>
+            <span style={{ color: minsColor, fontSize: '13px', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                {minsText}
+            </span>
         </div>
     )
 }

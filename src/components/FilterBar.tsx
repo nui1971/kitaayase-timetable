@@ -10,15 +10,15 @@ export const FilterBar = ({ destinations, hiddenDestinations, onToggle }: Filter
     if (!destinations.includes(AYASE)) return null
 
     return (
-        <div className="bg-[#0d1526] border-b border-[#1e2a3a] px-4 py-2">
-            <label className="flex items-center gap-2 cursor-pointer w-fit">
+        <div style={{ margin: '6px 16px 10px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                 <input
                     type="checkbox"
-                    checked={!hiddenDestinations.has(AYASE)}
+                    checked={hiddenDestinations.has(AYASE)}
                     onChange={() => onToggle(AYASE)}
-                    className="w-4 h-4 accent-[#006400]"
+                    style={{ accentColor: '#006400', width: '15px', height: '15px' }}
                 />
-                <span className="text-sm text-gray-300">綾瀬</span>
+                <span style={{ color: '#c8d6e8', fontSize: '13px' }}>綾瀬行を表示しない</span>
             </label>
         </div>
     )

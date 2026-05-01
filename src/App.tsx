@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import type { DayType } from './data/timetable'
 import { timetable } from './data/timetable'
 import { Header } from './components/Header'
+import { DayBadge } from './components/DayBadge'
 import { FilterBar } from './components/FilterBar'
 import { TrainList } from './components/TrainList'
 import { useCurrentTime } from './hooks/useCurrentTime'
@@ -23,23 +24,35 @@ function App() {
     const { destinations, hiddenDestinations, toggleDestination, filteredTrains } = useFilter(allDayTrains, upcomingTrains)
 
     return (
-        <div
-            className="flex flex-col h-dvh bg-[#0a0f1e] max-w-md mx-auto"
-            style={{
-                paddingTop: 'env(safe-area-inset-top)',
-                paddingBottom: 'env(safe-area-inset-bottom)',
-            }}
-        >
-            <Header now={now} dayType={dayType} />
+        <div style={{
+            backgroundColor: '#0d1526',
+            fontFamily: 'sans-serif',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100dvh',
+            maxWidth: '430px',
+            margin: '0 auto',
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+        }}>
+            <Header now={now} />
+            <DayBadge dayType={dayType} />
             <FilterBar
                 destinations={destinations}
                 hiddenDestinations={hiddenDestinations}
                 onToggle={toggleDestination}
             />
-            <main className="flex-1 overflow-y-auto">
+            <main style={{ flex: 1, overflowY: 'auto' }}>
                 <TrainList trains={filteredTrains} now={now} dayType={dayType} />
             </main>
-            <footer className="text-center text-xs text-gray-500 py-2 border-t border-[#1e2a3a] shrink-0">
+            <footer style={{
+                textAlign: 'center',
+                fontSize: '11px',
+                color: '#4a5568',
+                padding: '8px',
+                borderTop: '0.5px solid rgba(255,255,255,0.08)',
+                flexShrink: 0,
+            }}>
                 データ出典：東京メトロ（2026年3月14日改正）
             </footer>
         </div>
