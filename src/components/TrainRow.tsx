@@ -27,7 +27,7 @@ export const TrainRow = ({ train, isNext, isLast, minutesUntil }: TrainRowProps)
 
     if (isNext) {
         return (
-            <div className="bg-[#1a3a2e] px-4 py-4" data-testid="next-train">
+            <div className="bg-[#1a3a2e] px-4 py-4 rounded-xl" data-testid="next-train">
                 <div className="text-xs text-gray-400 mb-1">次の列車</div>
                 <div className="flex items-center gap-2 mb-1">
                     <span className="text-3xl font-bold text-white">{time}</span>
@@ -44,7 +44,7 @@ export const TrainRow = ({ train, isNext, isLast, minutesUntil }: TrainRowProps)
     }
 
     return (
-        <div className="flex items-center px-4 py-3 border-b border-[#1e2a3a] min-h-[52px] bg-[#0d1526]">
+        <div className="flex items-center px-4 py-3 rounded-xl bg-[#0d1526] min-h-[52px]">
             <span className="text-lg font-bold w-14 text-white tabular-nums">{time}</span>
             <span className="flex-1 text-gray-300 mx-2 text-sm">{train.destination}</span>
             <div className="flex items-center gap-2">

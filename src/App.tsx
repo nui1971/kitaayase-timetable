@@ -1,22 +1,21 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { DayType } from './data/timetable'
 import { timetable } from './data/timetable'
 import { Header } from './components/Header'
-import { TabBar } from './components/TabBar'
 import { FilterBar } from './components/FilterBar'
 import { TrainList } from './components/TrainList'
 import { useCurrentTime } from './hooks/useCurrentTime'
 import { filterUpcomingTrains } from './hooks/useTimetable'
 import { useFilter } from './hooks/useFilter'
 
-const getDefaultDayType = (now: Date): DayType => {
+const getDayType = (now: Date): DayType => {
     const day = now.getDay()
     return day === 0 || day === 6 ? 'holiday' : 'weekday'
 }
 
 function App() {
     const now = useCurrentTime()
-    const [dayType, setDayType] = useState<DayType>(() => getDefaultDayType(now))
+    const dayType = getDayType(now)
 
     const allDayTrains = useMemo(() => timetable[dayType], [dayType])
     const upcomingTrains = useMemo(() => filterUpcomingTrains(allDayTrains, now), [allDayTrains, now])
@@ -31,8 +30,7 @@ function App() {
                 paddingBottom: 'env(safe-area-inset-bottom)',
             }}
         >
-            <Header now={now} />
-            <TabBar selected={dayType} onSelect={setDayType} />
+            <Header now={now} dayType={dayType} />
             <FilterBar
                 destinations={destinations}
                 hiddenDestinations={hiddenDestinations}

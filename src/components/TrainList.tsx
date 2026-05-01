@@ -28,29 +28,32 @@ export const TrainList = ({ trains, now, dayType }: TrainListProps) => {
         )
     }
 
-    const displayed = expanded ? trains : trains.slice(0, INITIAL_COUNT)
-    const remaining = trains.length - INITIAL_COUNT
     const currentMinutes = toCurrentAbsoluteMinutes(now)
+    const listTrains = trains.slice(1)
+    const displayed = expanded ? listTrains : listTrains.slice(0, INITIAL_COUNT)
+    const remaining = listTrains.length - INITIAL_COUNT
 
     return (
-        <div>
-            <TrainRow
-                train={trains[0]}
-                isNext={true}
-                isLast={trains.length === 1}
-                minutesUntil={toAbsoluteMinutes(trains[0].hour, trains[0].minute) - currentMinutes}
-            />
-            <div className="flex items-center justify-between px-4 py-2 bg-[#0a0f1e] border-b border-[#1e2a3a]">
+        <div className="py-2">
+            <div className="mx-3 mb-2">
+                <TrainRow
+                    train={trains[0]}
+                    isNext={true}
+                    isLast={trains.length === 1}
+                    minutesUntil={toAbsoluteMinutes(trains[0].hour, trains[0].minute) - currentMinutes}
+                />
+            </div>
+            <div className="flex items-center justify-between px-4 py-1.5">
                 <span className="text-xs text-gray-400">綾瀬・代々木上原方面</span>
                 <span className="text-xs text-gray-500">{DAY_LABEL[dayType]}</span>
             </div>
-            <ul>
+            <ul className="px-3 flex flex-col gap-1.5">
                 {displayed.map((train, index) => (
                     <li key={`${train.hour}-${train.minute}-${train.destination}`}>
                         <TrainRow
                             train={train}
-                            isNext={index === 0}
-                            isLast={index === trains.length - 1}
+                            isNext={false}
+                            isLast={index + 1 === trains.length - 1}
                             minutesUntil={toAbsoluteMinutes(train.hour, train.minute) - currentMinutes}
                         />
                     </li>
@@ -59,7 +62,7 @@ export const TrainList = ({ trains, now, dayType }: TrainListProps) => {
             {!expanded && remaining > 0 && (
                 <button
                     onClick={() => setExpanded(true)}
-                    className="w-full py-3 text-sm text-gray-400 hover:text-gray-200 bg-[#0d1526] border-t border-[#1e2a3a] transition-colors"
+                    className="w-full mt-2 py-3 text-sm text-gray-400 hover:text-gray-200 transition-colors"
                 >
                     ▼ さらに表示（+{remaining}本）
                 </button>

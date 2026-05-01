@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react'
+import type { DayType } from '../data/timetable'
 
 interface HeaderProps {
     now: Date
+    dayType: DayType
 }
 
-export const Header = ({ now }: HeaderProps) => {
+const DAY_LABEL: Record<DayType, string> = {
+    weekday: '平日',
+    holiday: '土・休日',
+}
+
+export const Header = ({ now, dayType }: HeaderProps) => {
     const [seconds, setSeconds] = useState(() => new Date().getSeconds())
 
     useEffect(() => {
@@ -38,6 +45,7 @@ export const Header = ({ now }: HeaderProps) => {
                     <span className="text-lg font-mono text-gray-400 ml-1">{ss}</span>
                 </div>
                 <div className="text-xs text-gray-400">{dateStr}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{DAY_LABEL[dayType]}</div>
             </div>
         </header>
     )
