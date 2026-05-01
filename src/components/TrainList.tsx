@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import type { DayType, Train, TrainType } from '../data/timetable'
-import { TrainRow, formatMinutesUntil } from './TrainRow'
+import type { Train, TrainType } from '../data/timetable'
+import { TrainRow } from './TrainRow'
 import { toAbsoluteMinutes, toCurrentAbsoluteMinutes } from '../hooks/useTimetable'
 
 interface TrainListProps {
     trains: Train[]
     now: Date
-    dayType: DayType
 }
 
 const INITIAL_COUNT = 5
@@ -20,7 +19,7 @@ const NEXT_CARD_BADGE: Record<TrainType, { backgroundColor: string; color: strin
 const formatTime = (hour: number, minute: number): string =>
     `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
 
-export const TrainList = ({ trains, now, dayType }: TrainListProps) => {
+export const TrainList = ({ trains, now }: TrainListProps) => {
     const [expanded, setExpanded] = useState(false)
 
     if (trains.length === 0) {

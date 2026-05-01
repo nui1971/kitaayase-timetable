@@ -43,7 +43,7 @@ function App() {
                 onToggle={toggleDestination}
             />
             <main style={{ flex: 1, overflowY: 'auto' }}>
-                <TrainList trains={filteredTrains} now={now} dayType={dayType} />
+                <TrainList trains={filteredTrains} now={now} />
             </main>
             <footer style={{
                 textAlign: 'center',
