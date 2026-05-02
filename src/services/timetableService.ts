@@ -6,10 +6,17 @@ const STATION = 'odpt.Station:TokyoMetro.Chiyoda.KitaAyase'
 const CACHE_KEY_PREFIX = 'odpt_timetable_'
 
 const STATION_MAP: Record<string, string> = {
+    // 千代田線
     'odpt.Station:TokyoMetro.Chiyoda.Ayase': '綾瀬',
     'odpt.Station:TokyoMetro.Chiyoda.YoyogiUehara': '代々木上原',
-    'odpt.Station:TokyoMetro.Chiyoda.KasumigaSeki': '霞ケ関',
+    'odpt.Station:TokyoMetro.Chiyoda.Kasumigaseki': '霞ケ関',
     'odpt.Station:TokyoMetro.Chiyoda.MeijiJingumae': '明治神宮前',
+    // 小田急線（直通先）
+    'odpt.Station:Odakyu.Odawara.SeijogakuenMae': '成城学園前',
+    'odpt.Station:Odakyu.Odawara.MukogaokaYuen': '向ケ丘遊園',
+    'odpt.Station:Odakyu.Odawara.Isehara': '伊勢原',
+    'odpt.Station:Odakyu.Odawara.SagamiOno': '相模大野',
+    'odpt.Station:Odakyu.Tama.Karakida': '唐木田',
 }
 
 const TRAIN_TYPE_MAP: Record<string, TrainType> = {
@@ -26,22 +33,16 @@ const convertTrainType = (id: string): TrainType =>
 
 interface OdptEntry {
     'odpt:departureTime': string
-    'odpt:trainDirection'?: string
     'odpt:destinationStation'?: string[]
     'odpt:trainType'?: string
 }
 
 interface OdptStationTimetable {
     'odpt:calendar': string
-    'odpt:railDirection'?: string
     'odpt:stationTimetableObject': OdptEntry[]
 }
 
 const parseEntry = (entry: OdptEntry): Train | null => {
-    // エントリレベルの方向フィルタ（存在する場合）: Outbound のみ対象
-    const dir = entry['odpt:trainDirection']
-    if (dir && !dir.includes('Outbound')) return null
-
     const [hourStr, minuteStr] = entry['odpt:departureTime'].split(':')
     const hour = parseInt(hourStr, 10)
     const minute = parseInt(minuteStr, 10)
@@ -78,10 +79,7 @@ const fetchAllFromApi = async (): Promise<{ weekday: Train[]; holiday: Train[] }
     const result: { weekday: Train[]; holiday: Train[] } = { weekday: [], holiday: [] }
 
     for (const obj of data) {
-        // トップレベルの方向フィルタ: Outbound のみ対象
-        const railDir = obj['odpt:railDirection']
-        if (railDir && !railDir.includes('Outbound')) continue
-
+        // 北綾瀬は終点駅のため方向フィルタ不要（全件が代々木上原方面）
         const dayType = parseCalendar(obj['odpt:calendar'])
         if (!dayType) continue
 

@@ -2,29 +2,27 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { getTimetable } from '../services/timetableService'
 import { timetable } from '../data/timetable'
 
-// ODPT API モックレスポンス（平日・土休日の両方を含む）
+// ODPT API モックレスポンス（実際の API レスポンス形式に準拠）
 const mockOdptResponse = [
     {
         'odpt:calendar': 'odpt.Calendar:Weekday',
-        'odpt:railDirection': 'odpt.RailDirection:TokyoMetro.Outbound',
+        'odpt:railDirection': 'odpt.RailDirection:TokyoMetro.YoyogiUehara',
         'odpt:stationTimetableObject': [
             {
                 'odpt:departureTime': '05:00',
                 'odpt:trainType': 'odpt.TrainType:TokyoMetro.Local',
-                'odpt:trainDirection': 'odpt.TrainDirection:TokyoMetro.Outbound',
                 'odpt:destinationStation': ['odpt.Station:TokyoMetro.Chiyoda.Ayase'],
             },
             {
                 'odpt:departureTime': '08:57',
                 'odpt:trainType': 'odpt.TrainType:TokyoMetro.SemiExpress',
-                'odpt:trainDirection': 'odpt.TrainDirection:TokyoMetro.Outbound',
                 'odpt:destinationStation': ['odpt.Station:TokyoMetro.Chiyoda.YoyogiUehara'],
             },
         ],
     },
     {
         'odpt:calendar': 'odpt.Calendar:SaturdayHoliday',
-        'odpt:railDirection': 'odpt.RailDirection:TokyoMetro.Outbound',
+        'odpt:railDirection': 'odpt.RailDirection:TokyoMetro.YoyogiUehara',
         'odpt:stationTimetableObject': [
             {
                 'odpt:departureTime': '07:00',
