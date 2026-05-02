@@ -48,7 +48,7 @@ export const Header = ({ now, isNextDay }: HeaderProps) => {
                     {hh}:{mm}
                 </time>
                 <div style={{ color: '#8a9bb5', fontSize: '12px' }}>
-                    {isNextDay ? `${dateStr} → ${nextDateStr}` : dateStr}
+                    {isNextDay && now.getHours() >= 5 ? `${dateStr} → ${nextDateStr}` : dateStr}
                 </div>
             </div>
         </header>

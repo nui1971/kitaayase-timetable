@@ -43,8 +43,8 @@ function App() {
 
     const { destinations, hiddenDestinations, toggleDestination, filteredTrains } = useFilter(allDisplayDayTrains, displayUpstreamTrains)
 
-    // 深夜帯（0〜4時）で本日の残り列車がある場合、翌日分を接続表示
-    const isLateNight = !isNextDay && now.getHours() < 5
+    // 残り列車が少ない（5本未満）場合は翌日分を接続表示
+    const isLateNight = !isNextDay && upcomingTrains.length < 5
     const connectedTrains = useMemo(
         () => isLateNight ? filterByDestination(allTrainsMap[nextDayType], hiddenDestinations) : undefined,
         [isLateNight, allTrainsMap, nextDayType, hiddenDestinations]
