@@ -67,7 +67,6 @@ let pendingFetch: Promise<{ weekday: Train[]; holiday: Train[] }> | null = null
 
 const fetchAllFromApi = async (): Promise<{ weekday: Train[]; holiday: Train[] }> => {
     const token = import.meta.env.VITE_ODPT_TOKEN
-    console.log('[debug] VITE_ODPT_TOKEN:', token ? `設定済み(${String(token).length}文字)` : '未設定')
     if (!token) throw new Error('VITE_ODPT_TOKEN が設定されていません')
 
     const url = `${API_BASE}?odpt:station=${STATION}&acl:consumerKey=${token}`
@@ -95,7 +94,6 @@ const fetchAllFromApi = async (): Promise<{ weekday: Train[]; holiday: Train[] }
         throw new Error('変換後のデータが空でした')
     }
 
-    console.log('[debug] API変換成功: 平日', result.weekday.length, '件 / 土休日', result.holiday.length, '件')
     return result
 }
 
@@ -104,9 +102,7 @@ export const getTimetable = async (dayType: DayType): Promise<Train[]> => {
     const cached = sessionStorage.getItem(`${CACHE_KEY_PREFIX}${dayType}`)
     if (cached) {
         try {
-            const parsed = JSON.parse(cached) as Train[]
-            console.log('[debug] sessionStorageキャッシュ使用:', dayType, parsed.length, '件')
-            return parsed
+            return JSON.parse(cached) as Train[]
         } catch {
             // キャッシュが破損している場合は無視して再取得
         }
