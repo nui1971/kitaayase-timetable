@@ -4,6 +4,7 @@ import {
     toCurrentAbsoluteMinutes,
     filterUpcomingTrains,
     getNextDayType,
+    getServiceDay,
 } from '../hooks/useTimetable'
 import type { Train } from '../data/timetable'
 
@@ -84,6 +85,42 @@ describe('filterUpcomingTrains', () => {
         const result = filterUpcomingTrains(trains, makeDate(23, 56))
         expect(result).toHaveLength(1)
         expect(result[0]).toMatchObject({ hour: 0, minute: 15 })
+    })
+})
+
+describe('getServiceDay', () => {
+    // getDay(): 0=日, 1=月, 2=火, 3=水, 4=木, 5=金, 6=土
+    const makeDateTime = (day: number, hour: number): Date => {
+        const d = new Date(2025, 0, 5 + day) // 2025-01-05 は日曜 (0)
+        d.setHours(hour, 0, 0, 0)
+        return d
+    }
+
+    it('通常時間帯（5時以降）は getDay() をそのまま返す', () => {
+        // 土曜 10:00 → サービス日 = 土曜 (6)
+        expect(getServiceDay(makeDateTime(6, 10))).toBe(6)
+    })
+
+    it('深夜0〜4時は前日のサービス日を返す', () => {
+        // 日曜 00:30 → 土曜のサービス日 (6)
+        expect(getServiceDay(makeDateTime(0, 0))).toBe(6)
+    })
+
+    it('日曜深夜2時は土曜のサービス日 (6) を返す', () => {
+        expect(getServiceDay(makeDateTime(0, 2))).toBe(6)
+    })
+
+    it('月曜00:30は日曜のサービス日 (0) を返す', () => {
+        expect(getServiceDay(makeDateTime(1, 0))).toBe(0)
+    })
+
+    it('5時ちょうどは新しいサービス日として扱う', () => {
+        // 日曜 05:00 → 日曜のサービス日 (0)
+        expect(getServiceDay(makeDateTime(0, 5))).toBe(0)
+    })
+
+    it('月曜05:00は月曜のサービス日 (1) を返す', () => {
+        expect(getServiceDay(makeDateTime(1, 5))).toBe(1)
     })
 })
 

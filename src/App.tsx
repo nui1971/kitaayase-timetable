@@ -6,18 +6,18 @@ import { DayBadge } from './components/DayBadge'
 import { FilterBar } from './components/FilterBar'
 import { TrainList } from './components/TrainList'
 import { useCurrentTime } from './hooks/useCurrentTime'
-import { filterUpcomingTrains, getNextDayType } from './hooks/useTimetable'
-import { useFilter } from './hooks/useFilter'
+import { filterUpcomingTrains, getNextDayType, getServiceDay } from './hooks/useTimetable'
+import { useFilter, filterByDestination } from './hooks/useFilter'
 import { getTimetable } from './services/timetableService'
 
-const getDayType = (now: Date): DayType => {
-    const day = now.getDay()
-    return day === 0 || day === 6 ? 'holiday' : 'weekday'
+const getDayType = (serviceDay: number): DayType => {
+    return serviceDay === 0 || serviceDay === 6 ? 'holiday' : 'weekday'
 }
 
 function App() {
     const now = useCurrentTime()
-    const dayType = getDayType(now)
+    const serviceDayOfWeek = getServiceDay(now)
+    const dayType = getDayType(serviceDayOfWeek)
 
     // アプリ起動時に ODPT API から取得（初期値はフォールバック用ハードコードデータ）
     const [allTrainsMap, setAllTrainsMap] = useState<{ weekday: Train[]; holiday: Train[] }>(timetable)
@@ -36,12 +36,19 @@ function App() {
 
     // 終電後は翌日ダイヤに切り替える
     const isNextDay = upcomingTrains.length === 0
-    const nextDayType = useMemo(() => getNextDayType(now.getDay()), [now])
+    const nextDayType = useMemo(() => getNextDayType(serviceDayOfWeek), [serviceDayOfWeek])
     const displayDayType = isNextDay ? nextDayType : dayType
     const allDisplayDayTrains = allTrainsMap[displayDayType]
     const displayUpstreamTrains = isNextDay ? allDisplayDayTrains : upcomingTrains
 
     const { destinations, hiddenDestinations, toggleDestination, filteredTrains } = useFilter(allDisplayDayTrains, displayUpstreamTrains)
+
+    // 深夜帯（0〜4時）で本日の残り列車がある場合、翌日分を接続表示
+    const isLateNight = !isNextDay && now.getHours() < 5
+    const connectedTrains = useMemo(
+        () => isLateNight ? filterByDestination(allTrainsMap[nextDayType], hiddenDestinations) : undefined,
+        [isLateNight, allTrainsMap, nextDayType, hiddenDestinations]
+    )
 
     return (
         <div style={{
@@ -63,7 +70,7 @@ function App() {
                 onToggle={toggleDestination}
             />
             <main style={{ flex: 1, overflowY: 'auto' }}>
-                <TrainList trains={filteredTrains} now={now} isNextDay={isNextDay} />
+                <TrainList trains={filteredTrains} now={now} isNextDay={isNextDay} connectedTrains={connectedTrains} />
             </main>
             <footer style={{
                 textAlign: 'center',

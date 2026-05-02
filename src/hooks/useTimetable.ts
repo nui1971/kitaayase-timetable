@@ -28,6 +28,14 @@ export const getNextDayType = (currentDayOfWeek: number): DayType => {
     return nextDay === 0 || nextDay === 6 ? 'holiday' : 'weekday'
 }
 
+// サービス日の曜日を返す（0〜4時台は前日のサービス日として扱う）
+// 例：日曜00:30 → 土曜のサービス日 (6)
+export const getServiceDay = (now: Date): number => {
+    const h = now.getHours()
+    const day = now.getDay()
+    return h < 5 ? (day + 6) % 7 : day
+}
+
 export const useTimetable = (dayType: DayType, now: Date): Train[] => {
     const [trains, setTrains] = useState<Train[]>([])
 

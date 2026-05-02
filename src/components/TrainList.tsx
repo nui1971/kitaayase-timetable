@@ -7,6 +7,7 @@ interface TrainListProps {
     trains: Train[]
     now: Date
     isNextDay: boolean
+    connectedTrains?: Train[]
 }
 
 const INITIAL_COUNT = 5
@@ -21,7 +22,7 @@ const NEXT_CARD_BADGE: Record<TrainType, { backgroundColor: string; color: strin
 const formatTime = (hour: number, minute: number): string =>
     `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
 
-export const TrainList = ({ trains, now, isNextDay }: TrainListProps) => {
+export const TrainList = ({ trains, now, isNextDay, connectedTrains }: TrainListProps) => {
     const [expanded, setExpanded] = useState(false)
 
     if (trains.length === 0) {
@@ -109,7 +110,7 @@ export const TrainList = ({ trains, now, isNextDay }: TrainListProps) => {
                     style={{
                         display: 'block',
                         width: 'calc(100% - 32px)',
-                        margin: '10px 16px 16px',
+                        margin: '10px 16px 0',
                         padding: '10px',
                         backgroundColor: 'rgba(255,255,255,0.04)',
                         borderRadius: '10px',
@@ -122,6 +123,31 @@ export const TrainList = ({ trains, now, isNextDay }: TrainListProps) => {
                 >
                     {expanded ? '▲ 追加分を非表示' : '▼ さらに表示（+5本）'}
                 </button>
+            )}
+
+            {/* 深夜帯の翌日接続表示 */}
+            {connectedTrains && connectedTrains.length > 0 && (
+                <>
+                    <div style={{
+                        padding: '16px 16px 6px',
+                        color: '#4a5568',
+                        fontSize: '11px',
+                        textAlign: 'center',
+                    }}>
+                        ── 翌日の運行 ──
+                    </div>
+                    <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {connectedTrains.slice(0, 5).map((train) => (
+                            <TrainRow
+                                key={`connected-${train.hour}-${train.minute}-${train.destination}`}
+                                train={train}
+                                isFirst={false}
+                                isLast={false}
+                                minutesUntil={toAbsoluteMinutes(train.hour, train.minute) + 1440 - currentMinutes}
+                            />
+                        ))}
+                    </div>
+                </>
             )}
         </div>
     )
