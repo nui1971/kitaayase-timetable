@@ -22,6 +22,13 @@ const NEXT_CARD_BADGE: Record<TrainType, { backgroundColor: string; color: strin
 const formatTime = (hour: number, minute: number): string =>
     `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
 
+const formatNextMins = (mins: number): string => {
+    if (mins < 60) return `あと ${mins} 分`
+    const h = Math.floor(mins / 60)
+    const m = mins % 60
+    return m === 0 ? `あと ${h} 時間` : `あと ${h} 時間 ${m} 分`
+}
+
 export const TrainList = ({ trains, now, isNextDay, connectedTrains }: TrainListProps) => {
     const [expanded, setExpanded] = useState(false)
 
@@ -79,7 +86,7 @@ export const TrainList = ({ trains, now, isNextDay, connectedTrains }: TrainList
                     </span>
                 </div>
                 <div style={{ color: '#4a9e6a', fontSize: '16px', fontWeight: 500 }}>
-                    あと {nextMins} 分
+                    {formatNextMins(nextMins)}
                 </div>
             </div>
 
