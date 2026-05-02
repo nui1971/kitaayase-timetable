@@ -67,6 +67,7 @@ let pendingFetch: Promise<{ weekday: Train[]; holiday: Train[] }> | null = null
 
 const fetchAllFromApi = async (): Promise<{ weekday: Train[]; holiday: Train[] }> => {
     const token = import.meta.env.VITE_ODPT_TOKEN
+    console.log('[debug] VITE_ODPT_TOKEN:', token ? `設定済み(${String(token).length}文字)` : '未設定')
     if (!token) throw new Error('VITE_ODPT_TOKEN が設定されていません')
 
     const url = `${API_BASE}?odpt:station=${STATION}&acl:consumerKey=${token}`
