@@ -95,6 +95,7 @@ const fetchAllFromApi = async (): Promise<{ weekday: Train[]; holiday: Train[] }
         throw new Error('変換後のデータが空でした')
     }
 
+    console.log('[debug] API変換成功: 平日', result.weekday.length, '件 / 土休日', result.holiday.length, '件')
     return result
 }
 
@@ -103,7 +104,9 @@ export const getTimetable = async (dayType: DayType): Promise<Train[]> => {
     const cached = sessionStorage.getItem(`${CACHE_KEY_PREFIX}${dayType}`)
     if (cached) {
         try {
-            return JSON.parse(cached) as Train[]
+            const parsed = JSON.parse(cached) as Train[]
+            console.log('[debug] sessionStorageキャッシュ使用:', dayType, parsed.length, '件')
+            return parsed
         } catch {
             // キャッシュが破損している場合は無視して再取得
         }
