@@ -56,7 +56,17 @@ export const TrainList = ({ trains, now, isNextDay, connectedTrains }: TrainList
 
     return (
         <div>
-            {/* 次の列車カード */}
+            {/* 次の列車カード（スクロール時も上部に固定） */}
+            <div
+                data-testid="next-train-sticky"
+                style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
+                    backgroundColor: '#0d1526',
+                    paddingTop: '12px',
+                }}
+            >
             <div
                 data-testid="next-train"
                 style={{
@@ -88,6 +98,7 @@ export const TrainList = ({ trains, now, isNextDay, connectedTrains }: TrainList
                 <div style={{ color: '#4a9e6a', fontSize: '16px', fontWeight: 500 }}>
                     {formatNextMins(nextMins)}
                 </div>
+            </div>
             </div>
 
             {/* リストヘッダー */}

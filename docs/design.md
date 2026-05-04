@@ -97,19 +97,22 @@
 
 ### 2-5. 次の列車カード
 
+リストをスクロールしても画面上部に固定表示される（`position: sticky`）。
+
 | 要素 | 値 |
 |---|---|
-| margin | 0 16px 10px |
-| background | `#0a1f38` |
-| border-left | 3px solid `#006400` |
-| border-radius | 0 10px 10px 0 |
-| padding | 12px 14px |
-| 「次の列車」ラベル | color `#4a9e6a`・font-size 11px・margin-bottom 6px |
-| 時刻 | color `#fff`・font-size 32px・font-weight 300 |
-| 行き先 | color `#fff`・font-size 13px |
+| sticky ラッパー | `position: sticky`・`top: 0`・`z-index: 10`・`backgroundColor: #0d1526`・`paddingTop: 12px` |
+| margin | 0 16px 12px |
+| background | `linear-gradient(135deg, #0f2a4a, #0a2040)` |
+| border | 0.5px solid rgba(0,100,0,0.5) |
+| border-radius | 12px |
+| padding | 14px 16px |
+| 「次の列車」ラベル | color `#4a9e6a`・font-size 12px・margin-bottom 6px |
+| 時刻 | color `#fff`・font-size 42px・font-weight 300 |
+| 行き先 | color `#fff`・font-size 18px・font-weight 500 |
 | 種別バッジ | 下記バッジ仕様参照 |
-| レイアウト | 時刻・行き先・種別を1行横並び（gap 8px） |
-| 「あと XX 分」 | color `#4a9e6a`・font-size 12px・font-weight 500・margin-top 6px |
+| レイアウト | 時刻・行き先・種別を1行横並び（gap 10px・flex-wrap） |
+| 「あと XX 分」 | color `#4a9e6a`・font-size 16px・font-weight 500 |
 
 ---
 
@@ -433,3 +436,4 @@ git push
 | 2026-05-01 | 0.3 | ODPT API切り替え |
 | 2026-05-03 | 1.0 | UIデザイン確定・設計書作成 |
 | 2026-05-04 | 1.1 | 画面イメージ・画面構成を追加 |
+| 2026-05-04 | 1.2 | 次の列車カードを sticky 固定に変更 |
