@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import type { DayType, Train } from './data/timetable'
+import type { Train } from './data/timetable'
 import { timetable } from './data/timetable'
 import { Header } from './components/Header'
 import { DayBadge } from './components/DayBadge'
@@ -7,22 +7,16 @@ import { FilterBar } from './components/FilterBar'
 import { TrainList } from './components/TrainList'
 import { NextTrainCard } from './components/NextTrainCard'
 import { useCurrentTime } from './hooks/useCurrentTime'
-import { filterUpcomingTrains, getNextDayType, getServiceDay } from './hooks/useTimetable'
+import { filterUpcomingTrains, getServiceDate, getDayType } from './hooks/useTimetable'
 import { useFilter, filterByDestination } from './hooks/useFilter'
 import { getTimetable } from './services/timetableService'
-
-const getDayType = (serviceDay: number): DayType => {
-    return serviceDay === 0 || serviceDay === 6 ? 'holiday' : 'weekday'
-}
+import { loadHolidays } from './services/holidayService'
 
 function App() {
     const now = useCurrentTime()
-    const serviceDayOfWeek = getServiceDay(now)
-    const dayType = getDayType(serviceDayOfWeek)
 
-    // アプリ起動時に ODPT API から取得（初期値はフォールバック用ハードコードデータ）
+    // ODPT API から時刻表を取得（初期値はフォールバック用ハードコードデータ）
     const [allTrainsMap, setAllTrainsMap] = useState<{ weekday: Train[]; holiday: Train[] }>(timetable)
-
     useEffect(() => {
         Promise.all([
             getTimetable('weekday'),
@@ -32,12 +26,28 @@ function App() {
         })
     }, [])
 
+    // 祝日データを取得（失敗時は空 Set → 土日のみで判定）
+    const [holidays, setHolidays] = useState<Set<string>>(new Set())
+    useEffect(() => {
+        loadHolidays().then(setHolidays)
+    }, [])
+
+    // サービス日（0〜4時台は前日扱い）と翌日サービス日
+    const serviceDate = useMemo(() => getServiceDate(now), [now])
+    const nextServiceDate = useMemo(() => {
+        const next = new Date(serviceDate)
+        next.setDate(next.getDate() + 1)
+        return next
+    }, [serviceDate])
+
+    const dayType = useMemo(() => getDayType(serviceDate, holidays), [serviceDate, holidays])
+    const nextDayType = useMemo(() => getDayType(nextServiceDate, holidays), [nextServiceDate, holidays])
+
     const allDayTrains = allTrainsMap[dayType]
     const upcomingTrains = useMemo(() => filterUpcomingTrains(allDayTrains, now), [allDayTrains, now])
 
     // 終電後は翌日ダイヤに切り替える
     const isNextDay = upcomingTrains.length === 0
-    const nextDayType = useMemo(() => getNextDayType(serviceDayOfWeek), [serviceDayOfWeek])
     const displayDayType = isNextDay ? nextDayType : dayType
     const allDisplayDayTrains = allTrainsMap[displayDayType]
     const displayUpstreamTrains = isNextDay ? allDisplayDayTrains : upcomingTrains

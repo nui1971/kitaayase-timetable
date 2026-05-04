@@ -5,6 +5,8 @@ import {
     filterUpcomingTrains,
     getNextDayType,
     getServiceDay,
+    isHoliday,
+    getDayType,
 } from '../hooks/useTimetable'
 import type { Train } from '../data/timetable'
 
@@ -121,6 +123,46 @@ describe('getServiceDay', () => {
 
     it('月曜05:00は月曜のサービス日 (1) を返す', () => {
         expect(getServiceDay(makeDateTime(1, 5))).toBe(1)
+    })
+})
+
+describe('isHoliday', () => {
+    const holidays = new Set<string>(['2026-05-03', '2026-05-04', '2026-05-05'])
+
+    it('祝日リストに含まれる日付は true を返す', () => {
+        expect(isHoliday(new Date(2026, 4, 3), holidays)).toBe(true)
+    })
+
+    it('祝日リストに含まれない平日は false を返す', () => {
+        expect(isHoliday(new Date(2026, 4, 1), holidays)).toBe(false)
+    })
+
+    it('祝日リストが空の場合は常に false を返す', () => {
+        expect(isHoliday(new Date(2026, 4, 3), new Set())).toBe(false)
+    })
+})
+
+describe('getDayType（祝日判定含む）', () => {
+    // 2026-05-03（日）：憲法記念日
+    // 2026-05-04（月）：みどりの日（平日だが祝日）
+    // 2026-05-01（金）：平日
+    const holidays2026 = new Set<string>(['2026-05-03', '2026-05-04', '2026-05-05', '2026-05-06'])
+
+    it('祝日（2026-05-03 憲法記念日）が土休日ダイヤになること', () => {
+        expect(getDayType(new Date(2026, 4, 3), holidays2026)).toBe('holiday')
+    })
+
+    it('平日（2026-05-01）が平日ダイヤになること', () => {
+        expect(getDayType(new Date(2026, 4, 1), holidays2026)).toBe('weekday')
+    })
+
+    it('平日だが祝日リストに含まれる日（2026-05-04 月）が土休日ダイヤになること', () => {
+        // 曜日は月曜（平日）だが祝日リストに含まれるため holiday
+        expect(getDayType(new Date(2026, 4, 4), holidays2026)).toBe('holiday')
+    })
+
+    it('土曜は祝日リスト不問で土休日ダイヤになること', () => {
+        expect(getDayType(new Date(2026, 4, 2), new Set())).toBe('holiday')
     })
 })
 
