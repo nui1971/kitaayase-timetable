@@ -97,12 +97,13 @@
 
 ### 2-5. 次の列車カード
 
-リストをスクロールしても画面上部に固定表示される（`position: sticky`）。
+`<main>` の外（フレックスレイアウト内の固定領域）に配置するため、リストをスクロールしても常に表示される。
 
 | 要素 | 値 |
 |---|---|
-| sticky ラッパー | `position: sticky`・`top: 0`・`z-index: 10`・`backgroundColor: #0d1526`・`paddingTop: 12px` |
-| margin | 0 16px 12px |
+| コンポーネント | `NextTrainCard.tsx`（独立コンポーネント） |
+| 配置 | FilterBar と main の間（スクロール対象外） |
+| margin | 12px 16px 0 |
 | background | `linear-gradient(135deg, #0f2a4a, #0a2040)` |
 | border | 0.5px solid rgba(0,100,0,0.5) |
 | border-radius | 12px |
@@ -436,4 +437,4 @@ git push
 | 2026-05-01 | 0.3 | ODPT API切り替え |
 | 2026-05-03 | 1.0 | UIデザイン確定・設計書作成 |
 | 2026-05-04 | 1.1 | 画面イメージ・画面構成を追加 |
-| 2026-05-04 | 1.2 | 次の列車カードを sticky 固定に変更 |
+| 2026-05-04 | 1.2 | 次の列車カードを main 外の固定領域に移動（sticky 廃止） |

@@ -5,6 +5,7 @@ import { Header } from './components/Header'
 import { DayBadge } from './components/DayBadge'
 import { FilterBar } from './components/FilterBar'
 import { TrainList } from './components/TrainList'
+import { NextTrainCard } from './components/NextTrainCard'
 import { useCurrentTime } from './hooks/useCurrentTime'
 import { filterUpcomingTrains, getNextDayType, getServiceDay } from './hooks/useTimetable'
 import { useFilter, filterByDestination } from './hooks/useFilter'
@@ -69,6 +70,9 @@ function App() {
                 hiddenDestinations={hiddenDestinations}
                 onToggle={toggleDestination}
             />
+            {filteredTrains.length > 0 && (
+                <NextTrainCard train={filteredTrains[0]} now={now} isNextDay={isNextDay} />
+            )}
             <main style={{ flex: 1, overflowY: 'auto' }}>
                 <TrainList trains={filteredTrains} now={now} isNextDay={isNextDay} connectedTrains={connectedTrains} />
             </main>
