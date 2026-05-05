@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react'
 import type { DayType, Train } from '../data/timetable'
-import { getTimetable } from '../services/timetableService'
 
 // 列車時刻を深夜0時をまたいで比較できる絶対分数に変換する
 // 0時台は24時台として扱い、前日の終電と当日の始発を正しく区別する
@@ -63,14 +61,3 @@ export const getDayType = (date: Date, holidays: Set<string>): DayType => {
     return 'weekday'
 }
 
-export const useTimetable = (dayType: DayType, now: Date): Train[] => {
-    const [trains, setTrains] = useState<Train[]>([])
-
-    useEffect(() => {
-        getTimetable(dayType).then(allTrains => {
-            setTrains(filterUpcomingTrains(allTrains, now))
-        })
-    }, [dayType, now])
-
-    return trains
-}

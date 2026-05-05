@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import type { Train } from './data/timetable'
 import { timetable } from './data/timetable'
 import { Header } from './components/Header'
 import { DayBadge } from './components/DayBadge'
@@ -9,22 +8,12 @@ import { NextTrainCard } from './components/NextTrainCard'
 import { useCurrentTime } from './hooks/useCurrentTime'
 import { filterUpcomingTrains, getServiceDate, getDayType } from './hooks/useTimetable'
 import { useFilter, filterByDestination } from './hooks/useFilter'
-import { getTimetable } from './services/timetableService'
 import { loadHolidays } from './services/holidayService'
 
 function App() {
     const now = useCurrentTime()
 
-    // ODPT API から時刻表を取得（初期値はフォールバック用ハードコードデータ）
-    const [allTrainsMap, setAllTrainsMap] = useState<{ weekday: Train[]; holiday: Train[] }>(timetable)
-    useEffect(() => {
-        Promise.all([
-            getTimetable('weekday'),
-            getTimetable('holiday'),
-        ]).then(([weekday, holiday]) => {
-            setAllTrainsMap({ weekday, holiday })
-        })
-    }, [])
+    const allTrainsMap = timetable
 
     // 祝日データを取得（失敗時は空 Set → 土日のみで判定）
     const [holidays, setHolidays] = useState<Set<string>>(new Set())

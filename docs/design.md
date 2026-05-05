@@ -314,39 +314,14 @@ export interface Timetable {
 
 ---
 
-### 4-2. ODPT API
+### 4-2. データソース
 
-| 項目 | 値 |
+| 項目 | 内容 |
 |---|---|
-| エンドポイント | `https://api.odpt.org/api/v4/odpt:StationTimetable` |
-| 駅 | `odpt.Station:TokyoMetro.Chiyoda.KitaAyase` |
-| 方向 | 北綾瀬は終点のため方向フィルタ不要 |
-| 認証 | `acl:consumerKey`（環境変数 `VITE_ODPT_TOKEN`） |
-| キャッシュ | sessionStorage・キー：`odpt_timetable_weekday` / `odpt_timetable_holiday` |
-| フォールバック | API失敗時はハードコードデータを使用 |
-
-**駅名マッピング**
-
-| ODPT値 | 表示名 |
-|---|---|
-| `odpt.Station:TokyoMetro.Chiyoda.Ayase` | 綾瀬 |
-| `odpt.Station:TokyoMetro.Chiyoda.YoyogiUehara` | 代々木上原 |
-| `odpt.Station:TokyoMetro.Chiyoda.Kasumigaseki` | 霞ケ関 |
-| `odpt.Station:TokyoMetro.Chiyoda.MeijiJingumae` | 明治神宮前 |
-| `odpt.Station:Odakyu.Odawara.SeijogakuenMae` | 成城学園前 |
-| `odpt.Station:Odakyu.Odawara.MukogaokaYuen` | 向ケ丘遊園 |
-| `odpt.Station:Odakyu.Odawara.Isehara` | 伊勢原 |
-| `odpt.Station:Odakyu.Odawara.SagamiOno` | 相模大野 |
-| `odpt.Station:Odakyu.Tama.Karakida` | 唐木田 |
-
-**種別マッピング**
-
-| ODPT値 | 表示名 |
-|---|---|
-| `odpt.TrainType:TokyoMetro.Local` | 普通 |
-| `odpt.TrainType:TokyoMetro.SemiExpress` | 準急 |
-| `odpt.TrainType:TokyoMetro.Express` | 急行 |
-| その他 | 普通 |
+| データ種別 | ハードコード |
+| 理由 | ODPT API のデータ精度が不十分なため廃止 |
+| 更新方法 | ダイヤ改正時に timetable.ts を手動更新 |
+| 将来方針 | ODPT API は使用しない |
 
 ---
 
@@ -359,7 +334,6 @@ export interface Timetable {
 | ビルドツール | Vite | v8.x |
 | テスト | Vitest + React Testing Library | v4.x |
 | ホスティング | Vercel（無料プラン） | - |
-| 外部API | ODPT（公共交通オープンデータセンター） | v4 |
 | バージョン管理 | GitHub（Public） | - |
 
 ---
@@ -469,3 +443,4 @@ git push
 | 2026-05-04 | 1.1 | 画面イメージ・画面構成を追加 |
 | 2026-05-04 | 1.2 | 次の列車カードを main 外の固定領域に移動（sticky 廃止） |
 | 2026-05-04 | 1.3 | 祝日判定機能を追加（Holidays JP API） |
+| 2026-05-05 | 1.4 | ODPT API を廃止・ハードコードデータに完全切り替え |
