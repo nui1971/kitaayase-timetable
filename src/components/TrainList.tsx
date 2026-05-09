@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Train } from '../data/timetable'
 import { TrainRow } from './TrainRow'
-import { toAbsoluteMinutes, toCurrentAbsoluteMinutes } from '../hooks/useTimetable'
+import { toAbsoluteMinutes, toCurrentAbsoluteMinutes, buildCombinedTrains } from '../hooks/useTimetable'
 
 interface TrainListProps {
     trains: Train[]
@@ -16,7 +16,19 @@ const EXPANDED_COUNT = 10
 export const TrainList = ({ trains, now, isNextDay, connectedTrains }: TrainListProps) => {
     const [expanded, setExpanded] = useState(false)
 
-    if (trains.length === 0) {
+    const currentMinutes = toCurrentAbsoluteMinutes(now)
+    const currentOffset = isNextDay ? 1440 : 0
+
+    // 当日・翌日を1本の配列に統合し、各列車に分オフセットを付与
+    const allItems = buildCombinedTrains(trains, connectedTrains ?? []).map(
+        ({ train, isNextDay: itemIsNextDay }) => ({
+            train,
+            isNextDay: itemIsNextDay,
+            offset: itemIsNextDay ? 1440 : currentOffset,
+        })
+    )
+
+    if (allItems.length === 0) {
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
                 <p style={{ color: '#8a9bb5', fontSize: '16px', margin: 0 }}>本日の運行は終了しました</p>
@@ -25,12 +37,10 @@ export const TrainList = ({ trains, now, isNextDay, connectedTrains }: TrainList
         )
     }
 
-    const currentMinutes = toCurrentAbsoluteMinutes(now)
-    const nextDayOffset = isNextDay ? 1440 : 0
-
-    const displayed = expanded ? trains.slice(0, EXPANDED_COUNT) : trains.slice(0, INITIAL_COUNT)
-    const hasMore = trains.length > INITIAL_COUNT
-    const lastTrain = trains[trains.length - 1]
+    const displayed = allItems.slice(0, expanded ? EXPANDED_COUNT : INITIAL_COUNT)
+    const hasMore = allItems.length > INITIAL_COUNT
+    // 当日最終列車（「最終」バッジ表示用）
+    const lastTodayTrain = trains.length > 0 ? trains[trains.length - 1] : null
 
     return (
         <div>
@@ -41,20 +51,20 @@ export const TrainList = ({ trains, now, isNextDay, connectedTrains }: TrainList
                 </span>
             </div>
 
-            {/* 列車リスト */}
+            {/* 列車リスト（当日・翌日シームレス） */}
             <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {displayed.map((train, index) => (
+                {displayed.map(({ train, isNextDay: itemIsNextDay, offset }, index) => (
                     <TrainRow
-                        key={`${train.hour}-${train.minute}-${train.destination}`}
+                        key={`${itemIsNextDay ? 'next-' : ''}${train.hour}-${train.minute}-${train.destination}`}
                         train={train}
                         isFirst={index === 0}
-                        isLast={train === lastTrain}
-                        minutesUntil={toAbsoluteMinutes(train.hour, train.minute) + nextDayOffset - currentMinutes}
+                        isLast={train === lastTodayTrain}
+                        minutesUntil={toAbsoluteMinutes(train.hour, train.minute) + offset - currentMinutes}
                     />
                 ))}
             </div>
 
-            {/* 修正2: 展開/折りたたみボタン（+5本固定） */}
+            {/* 展開/折りたたみボタン（+5本固定） */}
             {hasMore && (
                 <button
                     onClick={() => setExpanded(v => !v)}
@@ -74,31 +84,6 @@ export const TrainList = ({ trains, now, isNextDay, connectedTrains }: TrainList
                 >
                     {expanded ? '▲ 追加分を非表示' : '▼ さらに表示（+5本）'}
                 </button>
-            )}
-
-            {/* 深夜帯の翌日接続表示 */}
-            {connectedTrains && connectedTrains.length > 0 && (
-                <>
-                    <div style={{
-                        padding: '16px 16px 6px',
-                        color: '#4a5568',
-                        fontSize: '11px',
-                        textAlign: 'center',
-                    }}>
-                        ── 翌日の運行 ──
-                    </div>
-                    <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {connectedTrains.slice(0, 5).map((train) => (
-                            <TrainRow
-                                key={`connected-${train.hour}-${train.minute}-${train.destination}`}
-                                train={train}
-                                isFirst={false}
-                                isLast={false}
-                                minutesUntil={toAbsoluteMinutes(train.hour, train.minute) + 1440 - currentMinutes}
-                            />
-                        ))}
-                    </div>
-                </>
             )}
         </div>
     )

@@ -7,7 +7,9 @@ import {
     getServiceDay,
     isHoliday,
     getDayType,
+    buildCombinedTrains,
 } from '../hooks/useTimetable'
+import { formatMinutesUntil } from '../components/TrainRow'
 import type { Train } from '../data/timetable'
 
 const makeDate = (hour: number, minute: number): Date => {
@@ -180,5 +182,76 @@ describe('getNextDayType', () => {
     it('日曜終電後は平日ダイヤになること', () => {
         // 0（日曜）→ 1（月曜）= 平日
         expect(getNextDayType(0)).toBe('weekday')
+    })
+})
+
+// ───────────────────────────────────────────────
+// buildCombinedTrains: 当日・翌日シームレス統合
+// ───────────────────────────────────────────────
+const makeTrain = (hour: number, minute: number): Train => ({
+    hour, minute, destination: '綾瀬', trainType: '普通',
+})
+
+describe('buildCombinedTrains', () => {
+    // 当日残り3本・翌日10本を用意
+    const todayTrains = [makeTrain(23, 30), makeTrain(23, 45), makeTrain(0, 5)]
+    const nextDayTrains = Array.from({ length: 10 }, (_, i) => makeTrain(5, i * 7))
+
+    it('残り3本の場合、翌日2本で補完して合計5本を表示できる', () => {
+        const combined = buildCombinedTrains(todayTrains, nextDayTrains)
+        const displayed = combined.slice(0, 5)
+        // 合計5本
+        expect(displayed.length).toBe(5)
+        // 当日3本・翌日2本
+        expect(displayed.filter(x => !x.isNextDay).length).toBe(3)
+        expect(displayed.filter(x => x.isNextDay).length).toBe(2)
+    })
+
+    it('残り0本の場合、翌日5本のみ表示される', () => {
+        const combined = buildCombinedTrains([], nextDayTrains)
+        const displayed = combined.slice(0, 5)
+        expect(displayed.length).toBe(5)
+        expect(displayed.every(x => x.isNextDay)).toBe(true)
+    })
+
+    it('展開時・残り3本の場合、翌日7本で補完して合計10本を表示できる', () => {
+        const combined = buildCombinedTrains(todayTrains, nextDayTrains)
+        const displayed = combined.slice(0, 10)
+        expect(displayed.length).toBe(10)
+        // 当日3本・翌日7本
+        expect(displayed.filter(x => !x.isNextDay).length).toBe(3)
+        expect(displayed.filter(x => x.isNextDay).length).toBe(7)
+    })
+
+    it('isNextDay フラグが当日は false・翌日は true になること', () => {
+        const combined = buildCombinedTrains(todayTrains, nextDayTrains)
+        // 先頭3件は当日
+        combined.slice(0, 3).forEach(x => expect(x.isNextDay).toBe(false))
+        // 4件目以降は翌日
+        combined.slice(3).forEach(x => expect(x.isNextDay).toBe(true))
+    })
+})
+
+// ───────────────────────────────────────────────
+// 翌日データのあと何分計算
+// ───────────────────────────────────────────────
+describe('翌日データのあと何分計算', () => {
+    it('現在00:10・翌日05:00 → 290分 → 4時間50分後と表示される', () => {
+        // 00:10 は toCurrentAbsoluteMinutes で 24*60+10 = 1450 に変換される
+        const now = makeDate(0, 10)
+        const currentMinutes = toCurrentAbsoluteMinutes(now) // 1450
+        const trainMinutes = toAbsoluteMinutes(5, 0)         // 300
+        const offset = 1440                                   // 翌日オフセット
+        const diff = trainMinutes + offset - currentMinutes  // 290
+        expect(diff).toBe(290)
+        expect(formatMinutesUntil(diff)).toBe('4時間50分後')
+    })
+
+    it('60分ちょうどの場合は「1時間後」と表示される', () => {
+        expect(formatMinutesUntil(60)).toBe('1時間後')
+    })
+
+    it('59分の場合は「59分後」と表示される', () => {
+        expect(formatMinutesUntil(59)).toBe('59分後')
     })
 })

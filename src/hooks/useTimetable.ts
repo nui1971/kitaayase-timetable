@@ -1,5 +1,16 @@
 import type { DayType, Train } from '../data/timetable'
 
+export type CombinedTrain = { train: Train; isNextDay: boolean }
+
+// 当日残り列車と翌日列車を1本の配列に統合する（翌日接続表示用）
+export const buildCombinedTrains = (
+    trains: Train[],
+    connectedTrains: Train[]
+): CombinedTrain[] => [
+    ...trains.map(t => ({ train: t, isNextDay: false })),
+    ...connectedTrains.map(t => ({ train: t, isNextDay: true })),
+]
+
 // 列車時刻を深夜0時をまたいで比較できる絶対分数に変換する
 // 0時台は24時台として扱い、前日の終電と当日の始発を正しく区別する
 
